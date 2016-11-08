@@ -1,9 +1,4 @@
 <!doctype html>
-<!--
-This page is shown when the extension button is clicked, because the
-"browser_action" field in manifest.json contains the "default_popup" key with
-value "popup.html".
--->
 <html>
 <head>
     <title>Let's try create button</title>
@@ -14,32 +9,24 @@ value "popup.html".
     <link href="/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous"/>
     <script src="/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 
-    <style>
-        body {
-            font-family: "Segoe UI", "Lucida Grande", Tahoma, sans-serif;
-            font-size: 100%;
-        }
-
-        #status {
-            /* avoid an excessively wide status text */
-            white-space: pre;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            max-width: 400px;
-        }
-    </style>
-    <!--
-    - JavaScript and HTML must be in separate files: see our Content Security
-    - Policy documentation[1] for details and explanation.
-    -
-    - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
-    -->
     <script src="popup.js"></script>
 </head>
 
 <body>
 <div id="status"></div>
-<!--<img id="image-result" hidden>-->
-<!--<button class="btn btn-default">Hello</button>-->
+<table class="table">
+    <tr>
+        <td><b>IP:</b></td>
+        <td id="ip"></td>
+    </tr>
+    <tr>
+        <td><b>Country:</b></td>
+        <td id="country"></td>
+    </tr>
+    <tr>
+        <td><b>City:</b></td>
+        <td id="city"></td>
+    </tr>
+</table>
 </body>
 </html>

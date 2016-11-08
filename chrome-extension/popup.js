@@ -17,34 +17,15 @@ function getCurrentTabUrl(callback) {
   };
 
   chrome.tabs.query(queryInfo, function(tabs) {
-    // chrome.tabs.query invokes the callback with a list of tabs that match the
-    // query. When the popup is opened, there is certainly a window and at least
-    // one tab, so we can safely assume that |tabs| is a non-empty array.
-    // A window can only have one active tab at a time, so the array consists of
-    // exactly one tab.
     var tab = tabs[0];
 
     // A tab is a plain object that provides information about the tab.
     // See https://developer.chrome.com/extensions/tabs#type-Tab
     var url = tab.url;
-    console.log(url)
-    // tab.url is only available if the "activeTab" permission is declared.
-    // If you want to see the URL of other tabs (e.g. after removing active:true
-    // from |queryInfo|), then the "tabs" permission is required to see their
-    // "url" properties.
     console.assert(typeof url == 'string', 'tab.url should be a string');
-
     callback(url);
   });
 
-  // Most methods of the Chrome extension APIs are asynchronous. This means that
-  // you CANNOT do something like this:
-  //
-  // var url;
-  // chrome.tabs.query(queryInfo, function(tabs) {
-  //   url = tabs[0].url;
-  // });
-  // alert(url); // Shows "undefined", because chrome.tabs.query is async.
 }
 
 /**
@@ -58,7 +39,6 @@ function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
   // Google image search - 100 searches per day.
   // https://developers.google.com/image-search/
   var searchUrl = 'https://freegeoip.net/json/' + encodeURIComponent(searchTerm);
-
   $.getJSON( searchUrl, callback);
 
 }
@@ -73,21 +53,21 @@ document.addEventListener('DOMContentLoaded', function() {
     host = pathArray[2];
     url = host;
     // Put the image URL in Google search.
-    renderStatus('Performing Google Image search for ' + url);
+    renderStatus('Collecting info ' + url);
 
     getBaseWebsiteInfo(url, function(baseInfo) {
 
-      renderStatus('Collecting info: ' + url + '\n' +
-          'Google image search result: ' + JSON.stringify(baseInfo));
-      // var imageResult = document.getElementById('image-result');
-      // Explicitly set the width/height to minimize the number of reflows. For
-      // a single image, this does not matter, but if you're going to embed
-      // multiple external images in your page, then the absence of width/height
-      // attributes causes the popup to resize multiple times.
-      // imageResult.width = width;
-      // imageResult.height = height;
-      // imageResult.src = imageUrl;
-      // imageResult.hidden = false;
+      console.log(baseInfo);
+
+      renderStatus('Info for: ' + url);
+
+      var ip = document.getElementById('ip');
+      var country = document.getElementById('country');
+      var city = document.getElementById('city');
+
+      ip.textContent = baseInfo['ip'];
+      country.textContent = baseInfo['country_name'];
+      city.textContent = baseInfo['city'];
 
     }, function(errorMessage) {
       renderStatus('Cannot display status. ' + errorMessage);
