@@ -10,6 +10,7 @@ from time import gmtime, strftime
 
 available_threads = 8
 ip_queue = Queue()
+# Read data from Azure table
 
 # table_service = TableService(account_name='ipstats', account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
 
@@ -21,6 +22,7 @@ ip_queue = Queue()
 # ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '"+owner.Name+"'")
 # for ip in ipAddresses:
 #     print(ip.Address)
+
 nm = nmap.PortScanner()
 
 def scnner_function(i, q):
@@ -35,22 +37,7 @@ def scnner_function(i, q):
         q.task_done()
 
 def main():
-    # '31.131.19.12'
-    #scanner1 = nmap.PortScanner()
-
-    #start_time = time.time()
     host = '85.90.221.244'
-    #scanner1.scan(host, arguments='-A -O')
-    #print("--- %s seconds ---" % (time.time() - start_time))
-
-    #print scanner1.command_line()
-    #print scanner1
-    #print scanner1.all_hosts()
-    #print scanner1[host].all_protocols()
-    #print scanner1[host]['tcp']
-    #print scanner1[host]['tcp'][80]
-    # print scanner1['31.131.19.12'].state()
-    # scanner2 = nmap.PortScannerAsync().scan('31.131.19.12')
     # Set up some threads to fetch the enclosures
 
     ip_queue.put(host)
@@ -68,8 +55,6 @@ def main():
         worker.start()
 
     ip_queue.join()
-    # make_requests()
-    # scanIpAddress(nma, 'empty')
 
 if __name__ == '__main__':
     main()
