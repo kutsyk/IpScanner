@@ -11,76 +11,59 @@ DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsi
 
 DOCUMENTDB_COLLECTION = 'host-banners'
 DOCUMENTDB_DATABASE = 'dbs/host-banners'
+ERRORS_DATABASE = 'dbs/errors'
 
 available_threads = 8
 ip_queue = Queue()
 # Read data from Azure table
 
-# table_service = TableService(account_name='ipstats', account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
+CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
+DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
+ERRORS_DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='errors'"))
 
-# owners = table_service.query_entities('owners')
-# owner = owners[5]
-# print(owner.ExpectedAmount)
-# for owner in owners:
+document_coll = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
+errors_coll = list(CLIENT.ReadCollections(ERRORS_DATABASE))
 
-# ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '"+owner.Name+"'")
-# for ip in ipAddresses:
-#     print(ip.Address)
+banners = document_coll[0]
+errors = errors_coll[0]
+
+table_service = TableService(account_name='ipstats',
+                             account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
 
 nm = nmap.PortScanner()
 
 
-def scnner_function(i, q):
+def scnner_function(i, owner, q):
     print "Thread %d: started" % i
     while True:
         host = q.get()
-        nm.scan(host, arguments="-O")
-        print (strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-        print "\n"
-        print nm[host]['tcp']
-        print "\n"
+        try:
+            nm.scan(host, arguments="-O")
+            CLIENT.CreateDocument(banners['_self'], {
+                'id': owner + '_id_' + host,
+                'info': nm[host]
+            })
+        except BaseException as e:
+            CLIENT.CreateDocument(errors['_self'], {
+                'id': owner + '_id_' + host,
+                'message': e.message
+            })
         q.task_done()
 
-
-DOCUMENTDB_DOCUMENT = 'test'
-
-
 def main():
-    host = '85.90.221.244'
-    # Set up some threads to fetch the enclosures
+    owners = table_service.query_entities('owners')
+    for owner in owners:
+        ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '" + owner.Name + "'")
+        for ip in ipAddresses:
+            ip_queue.put(ip.Address)
 
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
-    # ip_queue.put(host)
+        for i in xrange(available_threads):
+            worker = Thread(target=scnner_function, args=(i, owner.Name, ip_queue))
+            worker.setDaemon(True)
+            worker.start()
 
-    # for i in xrange(available_threads):
-    #     worker = Thread(target=scnner_function, args=(i, ip_queue))
-    #     worker.setDaemon(True)
-    #     worker.start()
-
-    # ip_queue.join()
-
-    client = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
-    db = list(client.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
-    # print db
-    # print len(db)
-    d = db[0]
-    collections = list(client.ReadCollections(DOCUMENTDB_DATABASE))
-    c = collections[0]
-    # Create document
-    print c
-    document = client.CreateDocument(c['_self'],
-                                     {'id': DOCUMENTDB_DOCUMENT,
-                                      'test0': 0,
-                                      'test1': 0,
-                                      'test2': 0,
-                                      'name': DOCUMENTDB_DOCUMENT
-                                      })
+        ip_queue.join()
+        ip_queue.queue.clear()
 
 
 if __name__ == '__main__':
