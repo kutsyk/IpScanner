@@ -39,7 +39,6 @@ def scnner_function(i, owner, q):
         host = q.get()
         # TODO: geolocation script --script ip-geolocation-geoplugin
         nm.scan(host, arguments="-O -A")
-        # if nm[host]:
         CLIENT.CreateDocument(banners['_self'], {
             'id': owner + '_id_' + host,
             'info': nm[host]
