@@ -39,11 +39,11 @@ def scnner_function(i, owner, q):
         host = q.get()
         # TODO: geolocation script --script ip-geolocation-geoplugin
         nm.scan(host, arguments="-O -A")
-        if nm[host]:
-            CLIENT.CreateDocument(banners['_self'], {
-                'id': owner + '_id_' + host,
-                'info': nm[host]
-            })
+        # if nm[host]:
+        CLIENT.CreateDocument(banners['_self'], {
+            'id': owner + '_id_' + host,
+            'info': nm[host]
+        })
     q.task_done()
 
 
@@ -51,9 +51,9 @@ def main():
     owners = table_service.query_entities('owners')
     for owner in owners:
         ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '" + owner.Name + "'")
+
         for ip in ipAddresses:
             ip_queue.put(ip.Address)
-            break
 
         for i in xrange(available_threads):
             worker = Thread(target=scnner_function, args=(i, owner.Name, ip_queue))
@@ -62,8 +62,6 @@ def main():
 
         ip_queue.join()
         ip_queue.queue.clear()
-        break
-
 
 if __name__ == '__main__':
     main()
