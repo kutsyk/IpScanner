@@ -19,13 +19,9 @@ ip_queue = Queue()
 
 CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
 DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
-ERRORS_DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='errors'"))
-
 document_coll = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
-errors_coll = list(CLIENT.ReadCollections(ERRORS_DATABASE))
 
 banners = document_coll[0]
-errors = errors_coll[0]
 
 table_service = TableService(account_name='ipstats',
                              account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
@@ -39,10 +35,11 @@ def scnner_function(i, owner, q):
         host = q.get()
         # TODO: geolocation script --script ip-geolocation-geoplugin
         nm.scan(host, arguments="-O -A")
-        CLIENT.CreateDocument(banners['_self'], {
-            'id': owner + '_id_' + host,
-            'info': nm[host]
-        })
+        if host in nm.all_hosts():
+            CLIENT.CreateDocument(banners['_self'], {
+                'id': owner + '_id_' + host,
+                'info': nm[host]
+            })
     q.task_done()
 
 
