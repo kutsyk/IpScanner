@@ -45,10 +45,11 @@ def scnner_function(i, q):
 
 def main():
     owners = table_service.query_entities('owners')
-    
+    workers = []
     for i in xrange(available_threads):
         worker = Thread(target=scnner_function, args=(i, ip_queue))
         worker.setDaemon(True)
+        workers.append(worker)
 
     for owner in owners:
             ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '" + owner.Name + "'")
@@ -58,7 +59,8 @@ def main():
                 
             ownerName = owner.Name
             
-            worker.start()
+            for worker in workers:
+                worker.start()
 
             ip_queue.join()
             ip_queue.queue.clear()
