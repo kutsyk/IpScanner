@@ -15,7 +15,7 @@ ERRORS_DATABASE = 'dbs/errors'
 
 available_threads = 8
 ip_queue = Queue()
-ownerName = None
+OWNER_NAME = ''
 # Read data from Azure table
 
 CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
@@ -29,22 +29,25 @@ table_service = TableService(account_name='ipstats',
 
 nm = nmap.PortScanner()
 
+def scan(i, q):
+    host = q.get()
+    # TODO: geolocation script --script ip-geolocation-geoplugin
+    nm.scan(host, arguments="-O -A")
+    if host in nm.all_hosts():
+        CLIENT.CreateDocument(banners['_self'], {
+            'id': OWNER_NAME + '_id_' + host,
+            'info': nm[host]
+        })
+    q.task_done()
 
 def scnner_function(i, q):
     print "Thread %d: started" % i
     while True:
-        host = q.get()
-        # TODO: geolocation script --script ip-geolocation-geoplugin
-        nm.scan(host, arguments="-O -A")
-        if host in nm.all_hosts():
-            CLIENT.CreateDocument(banners['_self'], {
-                'id': ownerName + '_id_' + host,
-                'info': nm[host]
-            })
-        q.task_done()
+        scan(i, q)    
 
 def main():
     owners = table_service.query_entities('owners')
+	
     workers = []
     for i in xrange(available_threads):
         worker = Thread(target=scnner_function, args=(i, ip_queue))
@@ -56,8 +59,8 @@ def main():
 
             for ip in ipAddresses:
                 ip_queue.put(ip.Address)
-                
-            ownerName = owner.Name
+            global OWNER_NAME
+            OWNER_NAME = owner.Name
             
             for worker in workers:
                 worker.start()
