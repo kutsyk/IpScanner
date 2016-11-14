@@ -15,6 +15,7 @@ ERRORS_DATABASE = 'dbs/errors'
 
 available_threads = 8
 ip_queue = Queue()
+ownerName = None
 # Read data from Azure table
 
 CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
@@ -29,7 +30,7 @@ table_service = TableService(account_name='ipstats',
 nm = nmap.PortScanner()
 
 
-def scnner_function(i, owner, q):
+def scnner_function(i, q):
     print "Thread %d: started" % i
     while True:
         host = q.get()
@@ -37,27 +38,30 @@ def scnner_function(i, owner, q):
         nm.scan(host, arguments="-O -A")
         if host in nm.all_hosts():
             CLIENT.CreateDocument(banners['_self'], {
-                'id': owner + '_id_' + host,
+                'id': ownerName + '_id_' + host,
                 'info': nm[host]
             })
-    q.task_done()
-
+        q.task_done()
 
 def main():
     owners = table_service.query_entities('owners')
+    
+    for i in xrange(available_threads):
+        worker = Thread(target=scnner_function, args=(i, ip_queue))
+        worker.setDaemon(True)
+
     for owner in owners:
-        ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '" + owner.Name + "'")
+            ipAddresses = table_service.query_entities('ipAddress', filter="PartitionKey eq '" + owner.Name + "'")
 
-        for ip in ipAddresses:
-            ip_queue.put(ip.Address)
-
-        for i in xrange(available_threads):
-            worker = Thread(target=scnner_function, args=(i, owner.Name, ip_queue))
-            worker.setDaemon(True)
+            for ip in ipAddresses:
+                ip_queue.put(ip.Address)
+                
+            ownerName = owner.Name
+            
             worker.start()
 
-        ip_queue.join()
-        ip_queue.queue.clear()
+            ip_queue.join()
+            ip_queue.queue.clear()
 
 if __name__ == '__main__':
     main()
