@@ -16,10 +16,10 @@ banners = DOCUMENTS_COLL[0]
 nm = nmap.PortScanner()
 
 host = '185.15.211.114'
-nm.scan(host, arguments="-O -A")
+nm.scan(host, arguments="-O -A -Pn")
 if nm[host]:
     CLIENT.CreateDocument(banners['_self'], {
-        'id': 'test_185.15.211.114',
+        'id': 'test_'+host,
         'info': nm[host]
     })
     print 'Success'
