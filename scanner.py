@@ -29,7 +29,7 @@ nm = nmap.PortScanner()
 
 def scan(host):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    nm.scan(host.Address, arguments="-O -A")
+    nm.scan(host.Address, arguments="-O -A -Pn")
     if host in nm.all_hosts():
         CLIENT.CreateDocument(banners['_self'], {
             'id': host.PartitionKey + '_id_' + host.Address,
