@@ -86,7 +86,6 @@ def main():
     print counter
     
     #     ip_queue.put(ip.Address)
-    # global OWNER_NAME
     # OWNER_NAME = owner.Name
 
     # print OWNER_NAME
