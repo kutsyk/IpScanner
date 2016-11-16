@@ -23,19 +23,16 @@ table_service = TableService(account_name='ipstats',
 
 nextPartKey = None
 nextRowKey = None
-
 nm = nmap.PortScanner()
 
-
-def scan(host):
+def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    nm.scan(host.Address, arguments="-O -A -Pn")
-    if host in nm.all_hosts():
+    nm.scan(host.Address, arguments="-Pn -O -A")
+    if host.Address in nm.all_hosts():
         CLIENT.CreateDocument(banners['_self'], {
             'id': host.PartitionKey + '_id_' + host.Address,
             'info': nm[host.Address]
         })
-
 
 def scnner_function(i, lock):
     print "Thread ", i
@@ -51,7 +48,7 @@ def scnner_function(i, lock):
             nextRowKey = oneObjectList.x_ms_continuation['NextRowKey']
             if not nextPartKey and not nextRowKey:
                 break
-        scan(currentIp)
+        scan(currentIp, nm)
 
 def main():
     workers = []
