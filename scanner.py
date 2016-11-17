@@ -28,9 +28,9 @@ nm = nmap.PortScanner()
 
 def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    TIMEOUT = 10
+
     pack = IP(dst=host) / ICMP()
-    reply = sr1(pack, timeout=TIMEOUT)
+    reply = sr1(pack, timeout=10)
     if reply is None:
         print "Down"
     else:
