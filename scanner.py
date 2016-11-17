@@ -24,23 +24,21 @@ table_service = TableService(account_name='ipstats',
 
 nextPartKey = None
 nextRowKey = None
+TIMEOUT = 5
 nm = nmap.PortScanner()
-
 def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-
-    pack = IP(dst=host.Address) / ICMP()
-    reply = sr1(pack, timeout=10)
+    pack = IP(dst=host.Address)/ICMP()
+    reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is None:
-        print "Down"
+        print ('Down: ' + host.Address)
     else:
-        print "Up"
-    # nm.scan(host.Address, arguments="-Pn -O -A")
-    # if host.Address in nm.all_hosts():
-    #     CLIENT.CreateDocument(banners['_self'], {
-    #         'id': host.PartitionKey + '_id_' + host.Address,
-    #         'info': nm[host.Address]
-    #     })
+        nm.scan(host.Address, arguments="-Pn -O -A")
+        if host.Address in nm.all_hosts():
+            CLIENT.CreateDocument(banners['_self'], {
+                'id': host.PartitionKey + '_id_' + host.Address,
+                'info': nm[host.Address]
+            })
 
 def scnner_function(i, lock):
     print "Thread ", i
