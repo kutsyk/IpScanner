@@ -4,6 +4,7 @@ import threading
 import nmap
 from azure.storage.table import TableService
 import pydocumentdb.document_client as document_client
+from scapy.layers.inet import *
 
 DOCUMENTDB_HOST = 'https://ipstats.documents.azure.com:443/'
 DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w=='
@@ -27,12 +28,19 @@ nm = nmap.PortScanner()
 
 def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    nm.scan(host.Address, arguments="-Pn -O -A")
-    if host.Address in nm.all_hosts():
-        CLIENT.CreateDocument(banners['_self'], {
-            'id': host.PartitionKey + '_id_' + host.Address,
-            'info': nm[host.Address]
-        })
+    TIMEOUT = 10
+    pack = IP(dst=host) / ICMP()
+    reply = sr1(pack, timeout=TIMEOUT)
+    if reply is None:
+        print "Down"
+    else:
+        print "Up"
+    # nm.scan(host.Address, arguments="-Pn -O -A")
+    # if host.Address in nm.all_hosts():
+    #     CLIENT.CreateDocument(banners['_self'], {
+    #         'id': host.PartitionKey + '_id_' + host.Address,
+    #         'info': nm[host.Address]
+    #     })
 
 def scnner_function(i, lock):
     print "Thread ", i
