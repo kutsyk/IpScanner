@@ -9,7 +9,7 @@ from scapy.layers.inet import *
 DOCUMENTDB_HOST = 'https://ipstats.documents.azure.com:443/'
 DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w=='
 
-DOCUMENTDB_COLLECTION = 'host-banners'
+DOCUMENTDB_COLLECTION = 'banners'
 DOCUMENTDB_DATABASE = 'dbs/host-banners'
 
 available_threads = 8
@@ -33,7 +33,7 @@ def scan(host, nm):
     if reply is None:
         print ('Down: ' + host.Address)
     else:
-        nm.scan(host.Address, arguments="-Pn -O -A")
+        nm.scan(host.Address, arguments="--min-rate 1000 --max-retries 0 -Pn -O -A")
         if host.Address in nm.all_hosts():
             CLIENT.CreateDocument(banners['_self'], {
                 'id': host.PartitionKey + '_id_' + host.Address,
