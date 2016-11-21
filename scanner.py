@@ -34,9 +34,7 @@ def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
     pack = IP(dst=host.Address)/ICMP()
     reply = sr1(pack, timeout=TIMEOUT, verbose=False)
-    if reply is None:
-        print ('Down: ' + host.Address)
-    else:
+    if reply is not None:
         nm.scan(host.Address, arguments=args)
         if host.Address in nm.all_hosts():
             CLIENT.CreateDocument(banners_dev['_self'], {
