@@ -10,6 +10,7 @@ DOCUMENTDB_HOST = 'https://ipstats.documents.azure.com:443/'
 DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w=='
 
 DOCUMENTDB_COLLECTION = 'banners'
+DOCUMENTDB_COLLECTION_DEV = 'banners-dev'
 DOCUMENTDB_DATABASE = 'dbs/host-banners'
 
 available_threads = 8
@@ -18,14 +19,17 @@ CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTD
 DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
 DOCUMENTS_COLL = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
 banners = DOCUMENTS_COLL[0]
+banners_dev = DOCUMENTS_COLL[1]
 
 table_service = TableService(account_name='ipstats',
                              account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
 
 nextPartKey = None
 nextRowKey = None
-TIMEOUT = 5
+TIMEOUT = 7
+
 nm = nmap.PortScanner()
+args = "--min-rate 1000 --max-retries 1 -sV -Pn --script=http-title --script=http-headers"
 def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
     pack = IP(dst=host.Address)/ICMP()
@@ -33,9 +37,9 @@ def scan(host, nm):
     if reply is None:
         print ('Down: ' + host.Address)
     else:
-        nm.scan(host.Address, arguments="--min-rate 1000 --max-retries 0 -Pn -O -A")
+        nm.scan(host.Address, arguments=args)
         if host.Address in nm.all_hosts():
-            CLIENT.CreateDocument(banners['_self'], {
+            CLIENT.CreateDocument(banners_dev['_self'], {
                 'id': host.PartitionKey + '_id_' + host.Address,
                 'info': nm[host.Address]
             })
