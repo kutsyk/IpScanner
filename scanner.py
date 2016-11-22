@@ -52,7 +52,7 @@ def scanner_function(i, q):
 
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(ip, nm)
+            scan(str(ip), nm)
 
         q.task_done()
 
