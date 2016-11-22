@@ -5,6 +5,8 @@ import nmap
 from azure.storage.table import TableService
 import pydocumentdb.document_client as document_client
 from scapy.layers.inet import *
+from Queue import Queue
+from netaddr import *
 
 DOCUMENTDB_HOST = 'https://ipstats.documents.azure.com:443/'
 DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w=='
@@ -26,7 +28,8 @@ table_service = TableService(account_name='ipstats',
 
 nextPartKey = None
 nextRowKey = None
-TIMEOUT = 7
+ipNetworksQueue = Queue()
+TIMEOUT = 5
 
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 1 -sV -Pn --script=http-title --script=http-headers"
@@ -37,41 +40,41 @@ def scan(host, nm):
     if reply is not None:
         nm.scan(host.Address, arguments=args)
         if host.Address in nm.all_hosts():
-            CLIENT.CreateDocument(banners_dev['_self'], {
+            CLIENT.CreateDocument(banners['_self'], {
                 'id': host.PartitionKey + '_id_' + host.Address,
                 'info': nm[host.Address]
             })
 
-def scnner_function(i, lock):
+def scanner_function(i, q):
     print "Thread ", i
-    global nextPartKey
-    global nextRowKey
-
     while True:
-        with lock:
-            oneObjectList = table_service.query_entities('ipAddress', filter='', top=1, next_partition_key=nextPartKey,
-                                                         next_row_key=nextRowKey)
-            currentIp = oneObjectList.pop()
-            nextPartKey = oneObjectList.x_ms_continuation['NextPartitionKey']
-            nextRowKey = oneObjectList.x_ms_continuation['NextRowKey']
-            if not nextPartKey and not nextRowKey:
-                break
-        scan(currentIp, nm)
+        network = q.get()
+
+        ipNet = IPNetwork(network)
+        for ip in ipNet:
+            scan(ip, nm)
+
+        q.task_done()
+
 
 def main():
     workers = []
-    lock = threading.Lock()
+    with open('CIDR.txt', 'r') as cidr_file:
+        line = cidr_file.readlines()
+        for l in line:
+            if l.startswith("#"):
+                continue
+            ipNetworksQueue.put(l)
+
     for i in xrange(available_threads):
-        worker = Thread(target=scnner_function, args=(i, lock))
+        worker = Thread(target=scanner_function, args=(i, ipNetworksQueue))
         worker.setDaemon(True)
         workers.append(worker)
 
     for worker in workers:
         worker.start()
 
-    for worker in workers:
-        worker.join()
-
+    ipNetworksQueue.join()
 
 if __name__ == '__main__':
     main()
