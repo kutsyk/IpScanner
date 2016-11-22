@@ -14,5 +14,9 @@ import nmap
 #banners = DOCUMENTS_COLL[0]
 #banners_dev = DOCUMENTS_COLL[1]
 
-cidr_file = open('CIDR.txt', 'r')
-print cidr_file.read()
+with open('CIDR.txt', 'r') as cidr_file:
+	lines  = cidr_file.readlines()
+	for l in lines:
+		print "- "+l
+	print len(lines)
+    #print cidr_file.read()
