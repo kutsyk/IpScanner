@@ -9,7 +9,7 @@ DOCUMENTDB_COLLECTION = 'host-banners'
 DOCUMENTDB_DATABASE = 'dbs/host-banners'
 
 CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
-DB = list(CLIENT.QueryDagitabases("SELECT * FROM root r WHERE r.id='host-banners'"))
+DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
 DOCUMENTS_COLL = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
 banners = DOCUMENTS_COLL[0]
 banners_dev = DOCUMENTS_COLL[1]
