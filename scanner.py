@@ -1,8 +1,6 @@
 #!/usr/bin/python
 from threading import Thread
-import threading
 import nmap
-from azure.storage.table import TableService
 import pydocumentdb.document_client as document_client
 from scapy.layers.inet import *
 from Queue import Queue
@@ -22,9 +20,6 @@ DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"
 DOCUMENTS_COLL = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
 banners = DOCUMENTS_COLL[0]
 banners_dev = DOCUMENTS_COLL[1]
-
-table_service = TableService(account_name='ipstats',
-                             account_key='yjtopnZUk0TvdrNixtWUGcyt0FJuUwolOFFLiwpUtFWHBSt9L4i/AsBWo4Hnpsd+Thf5xNCKczntE4MOM3XqRA==')
 
 nextPartKey = None
 nextRowKey = None
