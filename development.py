@@ -4,7 +4,7 @@ from netaddr import *
 from cloud import *
 
 nm = nmap.PortScanner()
-args = "--min-rate 1000 --max-retries 1 --min-parallelism 16 -sV -Pn --script=http-title --script=http-headers -T5"
+args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=http-headers"
 
 def scan(host):
     nm.scan(hosts=host, arguments=args)
