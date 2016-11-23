@@ -1,37 +1,22 @@
 #!/usr/bin/python
-from threading import Thread
 import nmap
-import pydocumentdb.document_client as document_client
-from scapy.layers.inet import *
+from threading import Thread
 from Queue import Queue
+import pydocumentdb.document_client as document_clien
+#from scapy.layers.inet import *
 from netaddr import *
+from cloud import *
 
-DOCUMENTDB_HOST = 'https://ipstats.documents.azure.com:443/'
-DOCUMENTDB_KEY = 'FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w=='
-
-DOCUMENTDB_COLLECTION = 'banners'
-DOCUMENTDB_COLLECTION_DEV = 'banners-dev'
-DOCUMENTDB_DATABASE = 'dbs/host-banners'
-
-available_threads = 8
-
-CLIENT = document_client.DocumentClient(DOCUMENTDB_HOST, {'masterKey': DOCUMENTDB_KEY})
-DB = list(CLIENT.QueryDatabases("SELECT * FROM root r WHERE r.id='host-banners'"))
-DOCUMENTS_COLL = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
-banners = DOCUMENTS_COLL[0]
-banners_dev = DOCUMENTS_COLL[1]
-
-nextPartKey = None
-nextRowKey = None
-ipNetworksQueue = Queue()
+AVAILABLE_THREADS = 8
 TIMEOUT = 5
+ipNetworksQueue = Queue()
 
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 1 -sV -Pn --script=http-title --script=http-headers"
 def scan(host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    pack = IP(dst=host)/ICMP()
-    reply = sr1(pack, timeout=TIMEOUT, verbose=False)
+    #pack = IP(dst=host)/ICMP()
+    #reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is not None:
         nm.scan(host, arguments=args)
         if host in nm.all_hosts():
@@ -61,7 +46,7 @@ def main():
                 continue
             ipNetworksQueue.put(l)
 
-    for i in xrange(available_threads):
+    for i in xrange(AVAILABLE_THREADS):
         worker = Thread(target=scanner_function, args=(i, ipNetworksQueue))
         worker.setDaemon(True)
         workers.append(worker)

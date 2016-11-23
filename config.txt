@@ -1,0 +1,6 @@
+[cloud-config]
+DOCUMENTDB_HOST = https://ipstats.documents.azure.com:443/
+DOCUMENTDB_KEY = FuRTjt01UVmWS1KRPxkbLxOw7imKhNyHIWluSxZ8rjwZrJSZwJKJUNBYhAzDsiOHk2yKdzv9JhQOuEHWtDhZ4w==
+
+DOCUMENTDB_COLLECTION = host-banners
+DOCUMENTDB_DATABASE = dbs/host-banners
