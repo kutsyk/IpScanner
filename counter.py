@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import sys
 import nmap
 import pydocumentdb.document_client as document_client
 
@@ -14,5 +15,10 @@ DOCUMENTS_COLL = list(CLIENT.ReadCollections(DOCUMENTDB_DATABASE))
 banners = DOCUMENTS_COLL[0]
 banners_dev = DOCUMENTS_COLL[1]
 
-docs = list(CLIENT.QueryDocuments(banners_dev['_self'], "Select * from c"))
+args = sys.argv
+
+if len(args) == 1:
+	docs = list(CLIENT.QueryDocuments(banners_dev['_self'], "Select * from c"))
+elif args[1]:
+	docs = list(CLIENT.QueryDocuments(banners['_self'], "Select * from c"))
 print len(docs)
