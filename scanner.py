@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import sys
 import nmap
 from threading import Thread
 from Queue import Queue
@@ -7,7 +8,7 @@ from scapy.layers.inet import *
 from netaddr import *
 from cloud import *
 
-AVAILABLE_THREADS = 16
+AVAILABLE_THREADS = 32
 TIMEOUT = 5
 ipNetworksQueue = Queue()
 
@@ -19,13 +20,16 @@ def scan(host, nm):
     pack = IP(dst=host) / ICMP()
     reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is not None:
-        nm.scan(host, arguments=args)
-        if host in nm.all_hosts():
-            if nm[host].state() == 'up':
-                CLIENT.CreateDocument(banners['_self'], {
-                    'id': 'id_' + host,
-                    'info': nm[host]
-                })
+        try:
+            nm.scan(host, arguments=args)
+            if host in nm.all_hosts():
+                if nm[host].state() == 'up':
+                    CLIENT.CreateDocument(banners['_self'], {
+                        'id': 'id_' + host,
+                        'info': nm[host]
+                    })
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
 
 def scanner_function(i, q):
     print "Thread ", i
