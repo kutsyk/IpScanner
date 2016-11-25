@@ -30,6 +30,8 @@ def scan(host, nm):
                     })
         except:
             print "Unexpected error:", sys.exc_info()[0]
+    del pack
+    del reply
 
 def scanner_function(i, q):
     print "Thread ", i
@@ -44,8 +46,6 @@ def scanner_function(i, q):
 
 
 def main():
-    sniff(filter="icmp", store=0)
-
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
