@@ -44,7 +44,7 @@ def scanner_function(i, q):
 
 
 def main():
-    sniff(store=0)
+    sniff(filter="icmp", store=0)
 
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
