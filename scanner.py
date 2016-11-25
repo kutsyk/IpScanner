@@ -38,12 +38,18 @@ def scanner_function(i, q):
 
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(str(ip), nm)
-
+            try:
+                doc = CLIENT.QueryDocuments(banners['_self'], "SELECT * FROM c WHERE c.id = id_" + str(ip))
+            except:
+                scan(str(ip), nm)
+            else:
+                continue
         q.task_done()
 
 
 def main():
+    sniff(store=0)
+
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
