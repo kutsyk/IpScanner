@@ -8,7 +8,7 @@ from scapy.layers.inet import *
 from netaddr import *
 from cloud import *
 
-AVAILABLE_THREADS = 32
+AVAILABLE_THREADS = 64
 TIMEOUT = 5
 ipNetworksQueue = Queue()
 
@@ -24,7 +24,7 @@ def scan(host, nm):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    CLIENT.CreateDocument(banners['_self'], {
+                    CLIENT.CreateDocument(banners_dev['_self'], {
                         'id': 'id_' + host,
                         'info': nm[host]
                     })
@@ -38,12 +38,8 @@ def scanner_function(i, q):
 
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            try:
-                doc = CLIENT.QueryDocuments(banners['_self'], "SELECT * FROM c WHERE c.id = id_" + str(ip))
-            except:
-                scan(str(ip), nm)
-            else:
-                continue
+            scan(str(ip), nm)
+
         q.task_done()
 
 
@@ -55,7 +51,6 @@ def main():
         for l in line:
             if l.startswith("#"):
                 continue
-
             ipNetworksQueue.put(l)
 
     for i in xrange(AVAILABLE_THREADS):
