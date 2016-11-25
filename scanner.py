@@ -8,7 +8,7 @@ from scapy.layers.inet import *
 from netaddr import *
 from cloud import *
 
-AVAILABLE_THREADS = 64
+AVAILABLE_THREADS = 32
 TIMEOUT = 5
 ipNetworksQueue = Queue()
 
