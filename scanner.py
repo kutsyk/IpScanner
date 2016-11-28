@@ -24,7 +24,7 @@ def scan(host, nm):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    CLIENT.CreateDocument(banners_dev['_self'], {
+                    CLIENT.CreateDocument(banners['_self'], {
                         'id': 'id_' + host,
                         'info': nm[host]
                     })
