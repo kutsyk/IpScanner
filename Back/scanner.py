@@ -3,7 +3,7 @@ import sys
 import nmap
 from threading import Thread
 from Queue import Queue
-import pydocumentdb.document_client as document_clien
+import gc
 from scapy.layers.inet import *
 from netaddr import *
 from cloud import *
@@ -15,37 +15,45 @@ ipNetworksQueue = Queue()
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=http-headers"
 
-def scan(host, nm):
+def scan(cloud, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    pack = IP(dst=host) / ICMP()
+    pack = IP(dst=host) / icmp
     reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is not None:
         try:
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    CLIENT.CreateDocument(banners['_self'], {
+                    cloud.CLIENT.CreateDocument(cloud.banners['_self'], {
                         'id': 'id_' + host,
                         'info': nm[host]
                     })
         except:
             print "Unexpected error:", sys.exc_info()[0]
+            gc.collect()
+
     del pack
     del reply
 
 def scanner_function(i, q):
     print "Thread ", i
+    thisThreadCloud = Cloud
+    icmp = ICMP()
+    
     while True:
         network = q.get()
 
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(str(ip), nm)
+            scan(thisThreadCloud, str(ip), nm, icmp)
 
         q.task_done()
+        del ipNet
+        gc.collect()
 
 
 def main():
+    sniff(store=0)
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
