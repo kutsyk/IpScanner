@@ -39,7 +39,7 @@ def scanner_function(i, q):
     print "Thread ", i
     thisThreadCloud = Cloud
     icmp = ICMP()
-    
+
     while True:
         network = q.get()
 
