@@ -51,6 +51,7 @@ def scanner_function(i, q):
 
 
 def main():
+    print "Program started"
     sniff(store=0)
     print "Started getting ips"
     with open('CIDR.txt', 'r') as cidr_file:
@@ -66,6 +67,7 @@ def main():
         worker.start()
 
     ipNetworksQueue.join()
+    print "Program finished"
 
 
 if __name__ == '__main__':
