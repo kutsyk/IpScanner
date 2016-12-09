@@ -53,14 +53,12 @@ def scanner_function(i, q):
 def main():
     print "Program started"
     sniff(store=0)
-    print "Started getting ips"
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
             if l.startswith("#"):
                 continue
             ipNetworksQueue.put(l)
-    print "Started scanning"
     for i in xrange(AVAILABLE_THREADS):
         worker = Thread(target=scanner_function, args=(i, ipNetworksQueue))
         worker.setDaemon(True)
