@@ -15,8 +15,9 @@ ipNetworksQueue = Queue()
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=http-headers"
 
-def scan(cloud, host, nm, icmp):
+def scan(conn, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin
+    conn.ipsHosts.insert({'ip': host})
     pack = IP(dst=host) / icmp
     reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is not None:
@@ -24,10 +25,7 @@ def scan(cloud, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    cloud.CLIENT.CreateDocument(cloud.banners['_self'], {
-                        'id': 'id_' + host,
-                        'info': nm[host]
-                    })
+                    conn.ipsBanners.insert(nm[host])
         except:
             print "Unexpected error:", sys.exc_info()[0]
             gc.collect()
@@ -37,7 +35,7 @@ def scan(cloud, host, nm, icmp):
 
 def scanner_function(i, q):
     print "Thread ", i
-    thisThreadCloud = Cloud
+    thisThreadConn = MongoConnector()
     icmp = ICMP()
 
     while True:
@@ -45,7 +43,7 @@ def scanner_function(i, q):
 
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(thisThreadCloud, str(ip), nm, icmp)
+            scan(thisThreadConn, str(ip), nm, icmp)
 
         q.task_done()
         del ipNet
