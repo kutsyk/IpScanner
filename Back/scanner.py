@@ -25,7 +25,7 @@ def scan(conn, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    conn.ipsBanners.insert(json.dumps(nm[host].__dict__))
+                    conn.ipsBanners.insert({"info" : nm[host]})
         except:
             print "Unexpected error:", sys.exc_info()[0]
             gc.collect()
