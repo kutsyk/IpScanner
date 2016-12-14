@@ -22,9 +22,10 @@ from pymongo.mongo_client import MongoClient
 #     banners = DOCUMENTS_COLL[0]
 #     banners_dev = DOCUMENTS_COLL[1]
 
+MONGODB_URI = "mongodb://user:pass@ds133348.mlab.com:33348/ipstats"
 class MongoConnector:
-    mongoClient = MongoClient()
-    ipDBProd = mongoClient.ipstats_prod
+    mongoClient = MongoClient(MONGODB_URI)
+    ipDBProd = mongoClient.get_default_database()
 
     ipDBDev = mongoClient.ipstats
     ipDevBanners = ipDBDev.ips_dev
