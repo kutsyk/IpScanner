@@ -25,9 +25,9 @@ def scan(conn, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    conn.ipsBanners.insert(bson.BSON.encode(nm[host].__dict__))
-        except Exception as e:
-            print "Unexpected error:", e
+                    conn.ipsBanners.insert(nm[host].__dict__)
+        except:
+            print "Unexpected error:", sys.exc_info()[0]
             gc.collect()
 
     del pack
@@ -59,6 +59,7 @@ def main():
             if l.startswith("#"):
                 continue
             ipNetworksQueue.put(l)
+
     for i in xrange(AVAILABLE_THREADS):
         worker = Thread(target=scanner_function, args=(i, ipNetworksQueue))
         worker.setDaemon(True)
