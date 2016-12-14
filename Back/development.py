@@ -1,7 +1,6 @@
 #!/usr/bin/python
 import nmap
 from netaddr import *
-from cloud import *
 
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=http-headers"

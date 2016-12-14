@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import nmap
+import bson
 from threading import Thread
 from Queue import Queue
 import gc
@@ -17,7 +18,6 @@ args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=htt
 
 def scan(conn, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    conn.ipsHosts.insert({'ip': host})
     pack = IP(dst=host) / icmp
     reply = sr1(pack, timeout=TIMEOUT, verbose=False)
     if reply is not None:
@@ -25,9 +25,9 @@ def scan(conn, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    conn.ipsBanners.insert(nm[host])
-        except:
-            print "Unexpected error:", sys.exc_info()[0]
+                    conn.ipsBanners.insert(bson.BSON.encode(nm[host].__dict__))
+        except Exception as e:
+            print "Unexpected error:", e
             gc.collect()
 
     del pack
