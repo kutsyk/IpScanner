@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys
 import nmap
-import json
+import bson
 from threading import Thread
 from Queue import Queue
 import gc
@@ -26,6 +26,8 @@ def scan(conn, host, nm, icmp):
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
                     conn.ipsBanners.insert({"info" : nm[host]})
+        except bson.errorr.InvalidDocument as e:
+            print str(e)
         except:
             print "Unexpected error:", sys.exc_info()[0]
             gc.collect()
