@@ -25,8 +25,7 @@ def scan(conn, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    res = nm[host]
-                    resD = res.__dict__
+                    resD = nm.__dict__
                     print resD
                     conn.ipsBanners.insert(resD)
         except bson.errorr.InvalidDocument as e:
