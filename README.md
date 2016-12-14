@@ -6,5 +6,4 @@
 $ pip install netaddr
 $ pip install scapy
 $ pip install nmap
-$ pip install pydocumentdb
 ```
