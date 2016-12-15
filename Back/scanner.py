@@ -6,11 +6,12 @@ import bson
 from threading import Thread
 from Queue import Queue
 import gc
-from scapy.layers.inet import IP, ICMP, ICMPerror, sr1, sniff
+from scapy.layers.inet import IP, ICMP
+from scapy.sendrecv import sr1, sniff
 from netaddr import IPNetwork
 from MyCloud import *
 
-AVAILABLE_THREADS = 32
+AVAILABLE_THREADS = 16
 TIMEOUT = 5
 ipNetworksQueue = Queue()
 
@@ -43,12 +44,14 @@ def scan(conn, host, nm, icmp):
                             else:
                                 portInfo[portKey] = GetPlainString(nm[host]["tcp"][port][portKey])
                         res["tcp"].append(portInfo)
+
                     res["hostnames"] = nm[host]["hostnames"]
                     res["addresses"] = nm[host]["addresses"]
                     res["vendor"] = nm[host]["vendor"]
 
                     conn.ipsBanners.insert(res)
-        except bson.errorr.InvalidDocument as e:
+
+        except AttributeError as e:
             print str(e)
         except:
             print "Unexpected error:", sys.exc_info()[0]
