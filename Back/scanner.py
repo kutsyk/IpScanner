@@ -27,12 +27,10 @@ def scan(conn, host, nm, icmp):
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
                     res = {}
-                    proto = nm[host]["tcp"]
-                    res[proto] = []
-                    lport = nm[host][proto].keys()
-                    lport.sort()
+                    res["tcp"] = []
+                    lport = nm[host]["tcp"].keys()
                     for port in lport:
-                        res[proto].append(nm[host][proto][port])
+                        res["tcp"].append(nm[host]["tcp"][port])
                     res["hostnames"] = nm[host]["hostnames"]
                     res["addresses"] = nm[host]["addresses"]
                     res["hostnames"] = nm[host]["hostnames"]
