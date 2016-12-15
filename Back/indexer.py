@@ -1,4 +1,4 @@
-from cloud import *
+from MyCloud import *
 from elasticsearch import Elasticsearch
 
 cloud = MongoConnector()

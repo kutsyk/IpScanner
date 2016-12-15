@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import nmap
-from cloud import *
+from MyCloud import *
 
 # nm = nmap.PortScanner()
 # host = '185.46.221.204'

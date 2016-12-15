@@ -2,7 +2,7 @@
 import nmap
 import socket
 from netaddr import *
-from cloud import *
+from MyCloud import *
 
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 0 -sV -Pn"

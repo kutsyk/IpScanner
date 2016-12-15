@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import nmap
+from MyCloud import *
 from netaddr import *
 
 nm = nmap.PortScanner()
@@ -24,6 +25,9 @@ def scan(host):
     res["hostnames"] = nm[host]["hostnames"]
     res["addresses"] = nm[host]["addresses"]
     res["vendor"] = nm[host]["vendor"]
+    thisThreadConn = MongoConnector()
+    thisThreadConn.ipDevBanners.insert(res)
+
 
 def GetPlainString(string):
     return string.replace('\n', ' ').replace('\r', '')

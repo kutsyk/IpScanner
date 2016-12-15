@@ -1,6 +1,6 @@
 #!/usr/bin/python
 import sys
-from cloud import *
+from MyCloud import *
 
 cloud = MongoConnector()
 

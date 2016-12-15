@@ -6,9 +6,9 @@ import bson
 from threading import Thread
 from Queue import Queue
 import gc
-from scapy.layers.inet import *
-from netaddr import *
-from cloud import *
+from scapy.layers.inet import IP, ICMP, ICMPerror, sr1, sniff
+from netaddr import IPNetwork
+from MyCloud import *
 
 AVAILABLE_THREADS = 32
 TIMEOUT = 5
@@ -48,7 +48,6 @@ def scan(conn, host, nm, icmp):
                     res["vendor"] = nm[host]["vendor"]
 
                     conn.ipsBanners.insert(res)
-
         except bson.errorr.InvalidDocument as e:
             print str(e)
         except:
