@@ -17,6 +17,9 @@ ipNetworksQueue = Queue()
 nm = nmap.PortScanner()
 args = "--min-rate 1000 --max-retries 0 -sV -Pn --script=http-title --script=http-headers"
 
+def GetPlainString(string):
+    return string.replace('\n', ' ').replace('\r', '')
+
 def scan(conn, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin
     pack = IP(dst=host) / icmp
@@ -30,10 +33,18 @@ def scan(conn, host, nm, icmp):
                     res["tcp"] = []
                     lport = nm[host]["tcp"].keys()
                     for port in lport:
-                        res["tcp"].append(nm[host]["tcp"][port])
+                        portInfo = {"port": port}
+                        for portKey in nm[host]["tcp"][port].keys():
+                            if portKey == 'script':
+                                portInfo[portKey] = {}
+                                for httpKeys in nm[host]["tcp"][port][portKey].keys():
+                                    portInfo[portKey][httpKeys] = GetPlainString(
+                                        nm[host]["tcp"][port][portKey][httpKeys])
+                            else:
+                                portInfo[portKey] = GetPlainString(nm[host]["tcp"][port][portKey])
+                        res["tcp"].append(portInfo)
                     res["hostnames"] = nm[host]["hostnames"]
                     res["addresses"] = nm[host]["addresses"]
-                    res["hostnames"] = nm[host]["hostnames"]
                     res["vendor"] = nm[host]["vendor"]
 
                     conn.ipsBanners.insert(res)
