@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import nmap
+import json
 import bson
 from threading import Thread
 from Queue import Queue
@@ -25,9 +26,20 @@ def scan(conn, host, nm, icmp):
             nm.scan(host, arguments=args)
             if host in nm.all_hosts():
                 if nm[host].state() == 'up':
-                    resD = nm.__dict__
-                    print resD
-                    conn.ipsBanners.insert(resD)
+                    res = {}
+                    proto = nm[host]["tcp"]
+                    res[proto] = []
+                    lport = nm[host][proto].keys()
+                    lport.sort()
+                    for port in lport:
+                        res[proto].append(nm[host][proto][port])
+                    res["hostnames"] = nm[host]["hostnames"]
+                    res["addresses"] = nm[host]["addresses"]
+                    res["hostnames"] = nm[host]["hostnames"]
+                    res["vendor"] = nm[host]["vendor"]
+
+                    conn.ipsBanners.insert(res)
+
         except bson.errorr.InvalidDocument as e:
             print str(e)
         except:
@@ -36,6 +48,8 @@ def scan(conn, host, nm, icmp):
 
     del pack
     del reply
+
+# def createProperBsonObject(obj)
 
 def scanner_function(i, q):
     print "Thread ", i
