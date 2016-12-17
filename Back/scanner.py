@@ -13,6 +13,7 @@ from MyCloud import *
 
 AVAILABLE_THREADS = 16
 TIMEOUT = 5
+ThreadConn = MongoConnector()
 ipNetworksQueue = Queue()
 
 nm = nmap.PortScanner()
@@ -50,7 +51,6 @@ def scan(conn, host, nm, icmp):
                     res["vendor"] = nm[host]["vendor"]
 
                     conn.ipsBanners.insert(res)
-
         except AttributeError as e:
             print str(e)
         except:
@@ -64,15 +64,12 @@ def scan(conn, host, nm, icmp):
 
 def scanner_function(i, q):
     print "Thread ", i
-    thisThreadConn = MongoConnector()
     icmp = ICMP()
-
     while True:
         network = q.get()
-
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(thisThreadConn, str(ip), nm, icmp)
+            scan(ThreadConn, str(ip), nm, icmp)
 
         q.task_done()
         del ipNet
@@ -80,8 +77,8 @@ def scanner_function(i, q):
 
 
 def main():
-    print "Program started"
-    sniff(store=0)
+    # print "Program started"
+    # sniff(store=0)
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
