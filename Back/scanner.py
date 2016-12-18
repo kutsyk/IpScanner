@@ -6,8 +6,8 @@ import bson
 from threading import Thread
 from Queue import Queue
 import gc
-from scapy.layers.inet import IP, ICMP
-from scapy.sendrecv import sr1, sniff
+# from scapy.layers.inet import IP, ICMP
+# from scapy.sendrecv import sr1, sniff
 from netaddr import IPNetwork
 from MyCloud import *
 
@@ -24,58 +24,45 @@ def GetPlainString(string):
     return string.replace('\n', ' ').replace('\r', '')
 
 
-def scan(conn, host, nm, icmp):
+def scan(conn, host, nm):
     # TODO: geolocation script --script ip-geolocation-geoplugin
-    pack = IP(dst=host) / icmp
+    # pack = IP(dst=host) / icmp
+    # try:
+    # reply = sr1(pack, timeout=TIMEOUT, verbose=False)
+    # if reply is not None:
     try:
-        reply = sr1(pack, timeout=TIMEOUT, verbose=False)
-        if reply is not None:
-            try:
-                nm.scan(host, arguments=args)
-                if host in nm.all_hosts():
-                    if nm[host].state() == 'up':
-                        # res = {}
-                        # res["tcp"] = []
-                        # lport = nm[host]["tcp"].keys()
-                        # for port in lport:
-                        #     portInfo = {"port": port}
-                        #     for portKey in nm[host]["tcp"][port].keys():
-                        #         if portKey == 'script':
-                        #             portInfo.script = {}
-                        #             for httpKeys in nm[host]["tcp"][port][portKey].keys():
-                        #                 portInfo.script[httpKeys] = GetPlainString(
-                        #                     nm[host].tcp[port].script.httpKeys)
-                        #         else:
-                        #             portInfo[portKey] = GetPlainString(nm[host]["tcp"][port][portKey])
-                        #     res["tcp"].append(portInfo)
-                        #
-                        # res["hostnames"] = nm[host]["hostnames"]
-                        # res["addresses"] = nm[host]["addresses"]
-                        # res["vendor"] = nm[host]["vendor"]
-                        print str(nm[host])
-                        res = json.loads(str(nm[host]))
-                        conn.ipsBanners.insert(res)
-            except TypeError as e:
-                        print str(e)
-            except AttributeError as e:
-                print str(e)
-            except:
-                print "Unexpected error:", sys.exc_info()[0]
-                gc.collect()
+        nm.scan(host, arguments=args)
+        if host in nm.all_hosts():
+            if nm[host].state() == 'up':
+                jsonRes = json.dumps(nm[host])
+                print "json: ",jsonRes
+                conn.ipsBanners.insert(jsonRes)
+    except KeyError as e:
+        print str(e)
+    except ValueError as e:
+        print str(e)
+    except TypeError as e:
+        print str(e)
+    except AttributeError as e:
+        print str(e)
     except:
-        print "Ping error:", sys.exc_info()[0]
+        print "Unexpected error:", sys.exc_info()[0]
         gc.collect()
-    del pack
-    del reply  # def createProperBsonObject(obj)
+        # except:
+        #     print "Ping error:", sys.exc_info()[0]
+        #     gc.collect()
+        # del pack
+        # del reply  # def createProperBsonObject(obj)
+
 
 def scanner_function(i, q):
     print "Thread ", i
-    icmp = ICMP()
+    # icmp = ICMP()
     while True:
         network = q.get()
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(ThreadConn, str(ip), nm, icmp)
+            scan(ThreadConn, str(ip), nm)
 
         q.task_done()
         del ipNet
