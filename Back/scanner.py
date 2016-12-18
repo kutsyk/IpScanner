@@ -52,7 +52,8 @@ def scan(conn, host, nm, icmp):
                         # res["hostnames"] = nm[host]["hostnames"]
                         # res["addresses"] = nm[host]["addresses"]
                         # res["vendor"] = nm[host]["vendor"]
-                        res = json.loads(nm[host])
+                        print str(nm[host])
+                        res = json.loads(str(nm[host]))
                         conn.ipsBanners.insert(res)
             except TypeError as e:
                         print str(e)
