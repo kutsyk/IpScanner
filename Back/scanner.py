@@ -11,7 +11,7 @@ from scapy.sendrecv import sr1, sniff
 from netaddr import IPNetwork
 from MyCloud import *
 
-AVAILABLE_THREADS = 16
+AVAILABLE_THREADS = 32
 TIMEOUT = 5
 ThreadConn = MongoConnector()
 ipNetworksQueue = Queue()
