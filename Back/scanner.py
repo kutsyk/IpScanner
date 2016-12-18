@@ -34,25 +34,25 @@ def scan(conn, host, nm, icmp):
                 nm.scan(host, arguments=args)
                 if host in nm.all_hosts():
                     if nm[host].state() == 'up':
-                        res = {}
-                        res["tcp"] = []
-                        lport = nm[host]["tcp"].keys()
-                        for port in lport:
-                            portInfo = {"port": port}
-                            for portKey in nm[host]["tcp"][port].keys():
-                                if portKey == 'script':
-                                    portInfo[portKey] = {}
-                                    for httpKeys in nm[host]["tcp"][port][portKey].keys():
-                                        portInfo[portKey][httpKeys] = GetPlainString(
-                                            nm[host]["tcp"][port][portKey][httpKeys])
-                                else:
-                                    portInfo[portKey] = GetPlainString(nm[host]["tcp"][port][portKey])
-                            res["tcp"].append(portInfo)
-
-                        res["hostnames"] = nm[host]["hostnames"]
-                        res["addresses"] = nm[host]["addresses"]
-                        res["vendor"] = nm[host]["vendor"]
-
+                        # res = {}
+                        # res["tcp"] = []
+                        # lport = nm[host]["tcp"].keys()
+                        # for port in lport:
+                        #     portInfo = {"port": port}
+                        #     for portKey in nm[host]["tcp"][port].keys():
+                        #         if portKey == 'script':
+                        #             portInfo.script = {}
+                        #             for httpKeys in nm[host]["tcp"][port][portKey].keys():
+                        #                 portInfo.script[httpKeys] = GetPlainString(
+                        #                     nm[host].tcp[port].script.httpKeys)
+                        #         else:
+                        #             portInfo[portKey] = GetPlainString(nm[host]["tcp"][port][portKey])
+                        #     res["tcp"].append(portInfo)
+                        #
+                        # res["hostnames"] = nm[host]["hostnames"]
+                        # res["addresses"] = nm[host]["addresses"]
+                        # res["vendor"] = nm[host]["vendor"]
+                        res = json.loads(nm[host])
                         conn.ipsBanners.insert(res)
             except AttributeError as e:
                 print str(e)
