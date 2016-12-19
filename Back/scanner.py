@@ -47,12 +47,14 @@ def scan(conn, host, nm, icmp):
             except:
                 print "Unexpected error:", sys.exc_info()[0]
                 gc.collect()
+                
+            del reply
     except:
         print "Ping error:", sys.exc_info()[0]
         gc.collect()
         
     del pack
-    del reply 
+    
 
 def scanner_function(i, q):
     print "Thread ", i
