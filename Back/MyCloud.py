@@ -12,6 +12,7 @@ class MongoConnector:
 
     ipsBanners = ipDBProd.ips_banners
     ipsHosts = ipDBProd.ips_hosts
+    processedIps = ipDBProd.processed_ips
 
 #args = sys.argv
 

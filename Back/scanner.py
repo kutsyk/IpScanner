@@ -9,6 +9,7 @@ import gc
 from scapy.layers.inet import IP, ICMP
 from scapy.sendrecv import sr1, sniff
 from netaddr import IPNetwork
+import netaddr
 from MyCloud import *
 
 AVAILABLE_THREADS = 32
