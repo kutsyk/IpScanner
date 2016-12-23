@@ -28,6 +28,7 @@ def GetPlainString(string):
 def scan(conn, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin   
     pack = IP(dst=host)/icmp
+    ThreadConn.processedIps.insert({"_id": int(netaddr.IPAddress(host))})
     try:
         reply = sr1(pack, timeout=TIMEOUT, verbose=False)
         if reply is not None:
@@ -48,7 +49,7 @@ def scan(conn, host, nm, icmp):
             except:
                 print "Unexpected error:", sys.exc_info()[0]
                 gc.collect()
-                
+
             del reply
     except:
         print "Ping error:", sys.exc_info()[0]
@@ -72,7 +73,7 @@ def scanner_function(i, q):
 
 
 def main():
-    # print "Program started"    
+    print "Program started"
     with open('CIDR.txt', 'r') as cidr_file:
         line = cidr_file.readlines()
         for l in line:
