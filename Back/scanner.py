@@ -14,7 +14,6 @@ from MyCloud import *
 
 AVAILABLE_THREADS = 32
 TIMEOUT = 5
-ThreadConn = MongoConnector()
 ipNetworksQueue = Queue()
 
 nm = nmap.PortScanner()
@@ -28,7 +27,7 @@ def GetPlainString(string):
 def scan(conn, host, nm, icmp):
     # TODO: geolocation script --script ip-geolocation-geoplugin   
     pack = IP(dst=host)/icmp
-    ThreadConn.processedIps.insert({"_id": int(netaddr.IPAddress(host))})
+    conn.processedIps.insert({"_id": int(netaddr.IPAddress(host))})
     try:
         reply = sr1(pack, timeout=TIMEOUT, verbose=False)
         if reply is not None:
@@ -61,12 +60,13 @@ def scan(conn, host, nm, icmp):
 def scanner_function(i, q):
     print "Thread ", i
     icmp = ICMP()
+    threadConn = MongoConnector()
     while True:
         network = q.get()
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            if (ThreadConn.processedIps.count({"_id" : int(netaddr.IPAddress(ip))}) == 0):
-                scan(ThreadConn, str(ip), nm, icmp)
+            if (threadConn.processedIps.count({"_id" : int(netaddr.IPAddress(ip))}) == 0):
+                scan(threadConn, str(ip), nm, icmp)
 
         q.task_done()
         del ipNet
