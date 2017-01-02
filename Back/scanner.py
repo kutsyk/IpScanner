@@ -65,7 +65,8 @@ def scanner_function(i, q):
         network = q.get()
         ipNet = IPNetwork(network)
         for ip in ipNet:
-            scan(ThreadConn, str(ip), nm, icmp)
+            if (ThreadConn.processedIps.count({"_id" : int(netaddr.IPAddress(ip))}) == 0):
+                scan(ThreadConn, str(ip), nm, icmp)
 
         q.task_done()
         del ipNet
