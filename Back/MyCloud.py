@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from pymongo.mongo_client import MongoClient
 
-MONGODB_URI = "mongodb://user:pass@52.178.187.80:27017/ipstats"
+MONGODB_URI = "mongodb://user:pass@localhost:27017/ipstats"
 
 class MongoConnector:
     mongoClient = MongoClient(MONGODB_URI)
