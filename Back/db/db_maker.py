@@ -38,9 +38,6 @@ def ProcessBanner(banner):
         banner["status"] = banObj["status"]
     if not contains(banner, "ip"):
         banner["ip"] = ip
-    if not contains(banner, "address"):
-        address = getAddress(ip)
-        banner["address"] = address
     if not contains(banner, "dec_ip"):
         banner["dec_ip"] = int(netaddr.IPAddress(banObj["addresses"]["ipv4"]))
     if not contains(banner, "hostnames"):
@@ -56,7 +53,6 @@ def ProcessBanner(banner):
                 banner[str(port)] = banObj["tcp"][str(port)]
     # tcp is null
     return banner
-
 
 i = 0
 for banner in ipDevCollection.find():
