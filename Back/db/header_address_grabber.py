@@ -17,13 +17,15 @@ ipDevCollection = ipDB.ips_banners
 # return ''.join(i for i in address if not i.isdigit())
 
 def getRipeInfo(banner, ip):
-    try:
-        headers = {'Accept': 'application/json'}
-        connLine = 'http://rest.db.ripe.net/search?source=ripe&query-string=' + ip
-        res = requests.get(connLine, headers=headers)
-        banner["ripe"] = res.json()["objects"]["object"]
-    except Exception as e:
-        print e
+    if not contains(banner, "ripe"):
+        try:
+            headers = {'Accept': 'application/json'}
+            connLine = 'http://rest.db.ripe.net/search?source=ripe&query-string=' + ip
+            res = requests.get(connLine, headers=headers)
+            banner["ripe"] = res.json()["objects"]["object"]
+        except Exception as e:
+            print e
+
 
 def getAddress(ip):
     response = requests.get('http://freegeoip.net/json/' + ip)
@@ -64,13 +66,13 @@ def contains(banner, key):
 def ProcessBanner(banner):
     ip = banner["ip"]
     t1 = Thread(target=processAddress, args=(banner, ip))
-    t2 = Thread(target=processHeadersThread, args=(banner, ip))
+    # t2 = Thread(target=processHeadersThread, args=(banner, ip))
     t3 = Thread(target=getRipeInfo, args=(banner, ip))
     t1.start()
-    t2.start()
+    # t2.start()
     t3.start()
     t1.join()
-    t2.join()
+    # t2.join()
     t3.join()
     # tcp is null
     return banner
