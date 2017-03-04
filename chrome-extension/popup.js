@@ -9,22 +9,22 @@
  *   is found.
  */
 function getCurrentTabUrl(callback) {
-  // Query filter to be passed to chrome.tabs.query - see
-  // https://developer.chrome.com/extensions/tabs#method-query
-  var queryInfo = {
-    active: true,
-    currentWindow: true
-  };
+    // Query filter to be passed to chrome.tabs.query - see
+    // https://developer.chrome.com/extensions/tabs#method-query
+    var queryInfo = {
+        active: true,
+        currentWindow: true
+    };
 
-  chrome.tabs.query(queryInfo, function(tabs) {
-    var tab = tabs[0];
+    chrome.tabs.query(queryInfo, function (tabs) {
+        var tab = tabs[0];
 
-    // A tab is a plain object that provides information about the tab.
-    // See https://developer.chrome.com/extensions/tabs#type-Tab
-    var url = tab.url;
-    console.assert(typeof url == 'string', 'tab.url should be a string');
-    callback(url);
-  });
+        // A tab is a plain object that provides information about the tab.
+        // See https://developer.chrome.com/extensions/tabs#type-Tab
+        var url = tab.url;
+        console.assert(typeof url == 'string', 'tab.url should be a string');
+        callback(url);
+    });
 
 }
 
@@ -36,41 +36,52 @@ function getCurrentTabUrl(callback) {
  *   The callback gets a string that describes the failure reason.
  */
 function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
-  // Google image search - 100 searches per day.
-  // https://developers.google.com/image-search/
-  var searchUrl = 'https://freegeoip.net/json/' + encodeURIComponent(searchTerm);
-  $.getJSON( searchUrl, callback);
-
+    // Google image search - 100 searches per day.
+    // https://developers.google.com/image-search/
+    var getIP = 'https://freegeoip.net/json/' + encodeURIComponent(searchTerm);
+    var options = {
+        url: 'https://rest.db.ripe.net/search?source=ripe&query-string=' + ip,
+        headers: {
+            'Accept': 'application/json'
+        }
+    };
+    $.getJSON(getIP, function (data) {
+        console.log(data);
+        console.log(data.ip);
+        console.log(data.country_code);
+        var cc = data.country_code.toLowerCase();
+        chrome.browserAction.setIcon({ path: '/flag_icons/png/'+cc+'.png'});
+    });
 }
 
 function renderStatus(statusText) {
-  document.getElementById('status').textContent = statusText;
+    document.getElementById('status').textContent = statusText;
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  getCurrentTabUrl(function(url) {
-    pathArray = url.split( '/' );
-    host = pathArray[2];
-    url = host;
-    // Put the image URL in Google search.
-    renderStatus('Collecting info ' + url);
+document.addEventListener('DOMContentLoaded', function () {
+    getCurrentTabUrl(function (url) {
+        pathArray = url.split('/');
+        host = pathArray[2];
+        url = host;
+        // Put the image URL in Google search.
+        renderStatus('Collecting info ' + url);
 
-    getBaseWebsiteInfo(url, function(baseInfo) {
+        getBaseWebsiteInfo(url,
+            function (baseInfo) {
+                console.log(baseInfo);
+                renderStatus('Info for: ' + url);
 
-      console.log(baseInfo);
+                var ip = document.getElementById('ip');
+                var owner = document.getElementById('hoster');
+                var country = document.getElementById('country');
+                var city = document.getElementById('city');
 
-      renderStatus('Info for: ' + url);
+                ip.textContent = baseInfo['ip'];
+                country.textContent = baseInfo['country_name'];
+                city.textContent = baseInfo['city'];
 
-      var ip = document.getElementById('ip');
-      var country = document.getElementById('country');
-      var city = document.getElementById('city');
-
-      ip.textContent = baseInfo['ip'];
-      country.textContent = baseInfo['country_name'];
-      city.textContent = baseInfo['city'];
-
-    }, function(errorMessage) {
-      renderStatus('Cannot display status. ' + errorMessage);
+            }, function (errorMessage) {
+                renderStatus('Cannot display status. ' + errorMessage);
+            });
     });
-  });
 });

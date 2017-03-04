@@ -1,11 +1,15 @@
 <!doctype html>
 <html>
 <head>
-    <title>Let's try create button</title>
+    <title>Base host info</title>
     <script src="jquery-2.1.3.min.js" crossorigin="anonymous"></script>
 
     <link href="/bootstrap-3.3.7-dist/css/bootstrap-theme.min.css" rel="stylesheet" type="text/css"
           crossorigin="anonymous"/>
+    <link rel="stylesheet"
+          type="text/css"
+          href="//cloud.github.com/downloads/lafeber/world-flags-sprite/flags32.css"/>
+
     <link href="/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" crossorigin="anonymous"/>
     <script src="/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
 
@@ -15,6 +19,10 @@
 <body>
 <div id="status"></div>
 <table class="table">
+    <tr>
+        <td><b>Hoster:</b></td>
+        <td id="hoster"></td>
+    </tr>
     <tr>
         <td><b>IP:</b></td>
         <td id="ip"></td>
