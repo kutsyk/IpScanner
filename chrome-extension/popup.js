@@ -1,16 +1,4 @@
-// Copyright (c) 2014 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-/**
- * Get the current URL.
- *
- * @param {function(string)} callback - called when the URL of the current tab
- *   is found.
- */
 function getCurrentTabUrl(callback) {
-    // Query filter to be passed to chrome.tabs.query - see
-    // https://developer.chrome.com/extensions/tabs#method-query
     var queryInfo = {
         active: true,
         currentWindow: true
@@ -19,8 +7,6 @@ function getCurrentTabUrl(callback) {
     chrome.tabs.query(queryInfo, function (tabs) {
         var tab = tabs[0];
 
-        // A tab is a plain object that provides information about the tab.
-        // See https://developer.chrome.com/extensions/tabs#type-Tab
         var url = tab.url;
         console.assert(typeof url == 'string', 'tab.url should be a string');
         callback(url);
@@ -28,33 +14,75 @@ function getCurrentTabUrl(callback) {
 
 }
 
-/**
- * @param {string} searchTerm - Search term for Google Image search.
- * @param {function(string,number,number)} callback - Called when an image has
- *   been found. The callback gets the URL, width and height of the image.
- * @param {function(string)} errorCallback - Called when the image is not found.
- *   The callback gets a string that describes the failure reason.
- */
-function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
-    // Google image search - 100 searches per day.
-    // https://developers.google.com/image-search/
-    var getIP = 'https://freegeoip.net/json/' + encodeURIComponent(searchTerm);
-    var options = {
-        url: 'https://rest.db.ripe.net/search?source=ripe&query-string=' + ip,
-        headers: {
-            'Accept': 'application/json'
-        }
-    };
-    $.getJSON(getIP, function (data) {
-        console.log(data);
-        console.log(data.ip);
-        console.log(data.country_code);
-        var cc = data.country_code.toLowerCase();
-        chrome.browserAction.setIcon({ path: '/flag_icons/png/'+cc+'.png'});
+function sendWhoisRequest(url, success, error) {
+    $.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json',
+        success: success,
+        error: error,
+        beforeSend: setHeader
     });
+
+    function setHeader(xhr) {
+        xhr.setRequestHeader('Accept', 'application/json');
+    }
+}
+
+function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
+    var getIP = 'https://freegeoip.net/json/' + encodeURIComponent(searchTerm);
+    var ripeUrl = 'https://rest.db.ripe.net/search?source=ripe&query-string=';
+    var arinUrl = 'https://whois.arin.net/rest/ip/';
+
+    $.getJSON(getIP, function (data) {
+        var ip = data.ip;
+        ripeUrl += ip;
+        arinUrl += ip;
+        var cc = data.country_code.toLowerCase();
+        var country = data.country_name;
+        chrome.browserAction.setIcon({path: '/flag_icons/png/' + cc + '.png'});
+        sendWhoisRequest(ripeUrl, function (ripeData) {
+
+                var person = {};
+                var objects = ripeData.objects.object;
+                console.log(ripeData);
+                for (var i = 0; i < objects.length; i++)
+                {
+                    if (objects[i].type == "person")
+                    {
+                        console.log(objects[i]);
+                        var attr = objects[i].attributes.attribute;
+                        console.log("ATTR");
+                        console.log(attr);
+                        for (var j = 0; j < attr.length; j++)
+                        {
+                            if (attr[j].name == "person")
+                                person.name = attr.value;
+
+                            if (attr[j].name == "phone")
+                                person.phone = attr.value;
+                        }
+                        console.log(person);
+                    }
+                }
+                data.whois = ripeData;
+                callback(data);
+            },
+            function (ripeError) {
+                sendWhoisRequest(arinUrl, function (arinData) {
+                        data.whois = arinData;
+                        callback(data);
+                    },
+                    function (arinError) {
+                        console.log('error');
+                    });
+            });
+    });
+
 }
 
 function renderStatus(statusText) {
+    OPENED = false;
     document.getElementById('status').textContent = statusText;
 }
 
@@ -66,22 +94,25 @@ document.addEventListener('DOMContentLoaded', function () {
         // Put the image URL in Google search.
         renderStatus('Collecting info ' + url);
 
-        getBaseWebsiteInfo(url,
-            function (baseInfo) {
-                console.log(baseInfo);
-                renderStatus('Info for: ' + url);
+        getBaseWebsiteInfo(url, function (data) {
+            var ip = data.ip;
+            var city = data.city;
+            var country = data.country_name;
+            renderStatus(ip);
 
-                var ip = document.getElementById('ip');
-                var owner = document.getElementById('hoster');
-                var country = document.getElementById('country');
-                var city = document.getElementById('city');
+            var ipO = document.getElementById('ip');
+            var ownerO = document.getElementById('hoster');
+            var addressO = document.getElementById('address');
 
-                ip.textContent = baseInfo['ip'];
-                country.textContent = baseInfo['country_name'];
-                city.textContent = baseInfo['city'];
-
-            }, function (errorMessage) {
-                renderStatus('Cannot display status. ' + errorMessage);
-            });
+            ipO.textContent = ip;
+            ownerO.textContent = "unknown";
+            addressO.textContent = country + ', ' + city;
+            // chrome.storage.sync.set({'synced': true}, function() {
+                // Notify that we saved.
+                // console.log('Settings saved');
+            // });
+        }, function (errorMessage) {
+            renderStatus('Cannot display status. ' + errorMessage);
+        });
     });
 });

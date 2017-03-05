@@ -11,6 +11,10 @@
   },
   "permissions": [
     "activeTab",
-    "https://ajax.googleapis.com/"
+    "storage",
+    "https://ajax.googleapis.com/",
+    "https://rest.db.ripe.net/",
+    "https://whois.arin.net/",
+    "https://freegeoip.net/"
   ]
 }
