@@ -50,22 +50,22 @@ function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
                 {
                     if (objects[i].type == "person")
                     {
-                        console.log(objects[i]);
+                        // console.log(objects[i]);
                         var attr = objects[i].attributes.attribute;
-                        console.log("ATTR");
-                        console.log(attr);
+                        // console.log("ATTR");
+                        // console.log(attr);
                         for (var j = 0; j < attr.length; j++)
                         {
                             if (attr[j].name == "person")
-                                person.name = attr.value;
+                                person.name = attr[j].value;
 
                             if (attr[j].name == "phone")
-                                person.phone = attr.value;
+                                person.phone = attr[j].value;
                         }
-                        console.log(person);
+                        // console.log(person);
                     }
                 }
-                data.whois = ripeData;
+                data.whois = person;
                 callback(data);
             },
             function (ripeError) {
@@ -98,14 +98,18 @@ document.addEventListener('DOMContentLoaded', function () {
             var ip = data.ip;
             var city = data.city;
             var country = data.country_name;
+            var owner = data.whois.name;
+            var phone = data.whois.phone;
             renderStatus(ip);
 
             var ipO = document.getElementById('ip');
+            var phoneO = document.getElementById('phone');
             var ownerO = document.getElementById('hoster');
             var addressO = document.getElementById('address');
 
             ipO.textContent = ip;
-            ownerO.textContent = "unknown";
+            phoneO.textContent = phone;
+            ownerO.textContent = owner;
             addressO.textContent = country + ', ' + city;
             // chrome.storage.sync.set({'synced': true}, function() {
                 // Notify that we saved.
