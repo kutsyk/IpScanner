@@ -46,16 +46,13 @@ function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
                 var person = {};
                 var objects = ripeData.objects.object;
                 console.log(ripeData);
-                for (var i = 0; i < objects.length; i++)
-                {
-                    if (objects[i].type == "person")
-                    {
+                for (var i = 0; i < objects.length; i++) {
+                    if (objects[i].type == "person") {
                         // console.log(objects[i]);
                         var attr = objects[i].attributes.attribute;
                         // console.log("ATTR");
                         // console.log(attr);
-                        for (var j = 0; j < attr.length; j++)
-                        {
+                        for (var j = 0; j < attr.length; j++) {
                             if (attr[j].name == "person")
                                 person.name = attr[j].value;
 
@@ -66,12 +63,15 @@ function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
                     }
                 }
                 data.whois = person;
-                callback(data);
+                chrome.storage.local.set({cache: data, cacheTime: Date.now()}, function() {
+                    callback(data);
+                });
+                // callback(data);
             },
             function (ripeError) {
                 sendWhoisRequest(arinUrl, function (arinData) {
                         data.whois = arinData;
-                        callback(data);
+                       callback(data);
                     },
                     function (arinError) {
                         console.log('error');
@@ -86,6 +86,30 @@ function renderStatus(statusText) {
     document.getElementById('status').textContent = statusText;
 }
 
+function RenderView(data) {
+        console.log(data);
+        var ip = data.ip;
+        var city = data.city;
+        var country = data.country_name;
+        var owner = data.whois.name;
+        var phone = data.whois.phone;
+        renderStatus(ip);
+
+        var ipO = document.getElementById('ip');
+        var phoneO = document.getElementById('phone');
+        var ownerO = document.getElementById('hoster');
+        var addressO = document.getElementById('address');
+
+        ipO.textContent = ip;
+        phoneO.textContent = phone;
+        ownerO.textContent = owner;
+        addressO.textContent = country + ', ' + city;
+        // chrome.storage.sync.set({'synced': true}, function() {
+        // Notify that we saved.
+        // console.log('Settings saved');
+        // });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     getCurrentTabUrl(function (url) {
         pathArray = url.split('/');
@@ -94,29 +118,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // Put the image URL in Google search.
         renderStatus('Collecting info ' + url);
 
-        getBaseWebsiteInfo(url, function (data) {
-            var ip = data.ip;
-            var city = data.city;
-            var country = data.country_name;
-            var owner = data.whois.name;
-            var phone = data.whois.phone;
-            renderStatus(ip);
-
-            var ipO = document.getElementById('ip');
-            var phoneO = document.getElementById('phone');
-            var ownerO = document.getElementById('hoster');
-            var addressO = document.getElementById('address');
-
-            ipO.textContent = ip;
-            phoneO.textContent = phone;
-            ownerO.textContent = owner;
-            addressO.textContent = country + ', ' + city;
-            // chrome.storage.sync.set({'synced': true}, function() {
-                // Notify that we saved.
-                // console.log('Settings saved');
-            // });
-        }, function (errorMessage) {
-            renderStatus('Cannot display status. ' + errorMessage);
+        chrome.storage.local.get(['cache', 'cacheTime'], function (items) {
+            console.log(items);
+            if (items.cache && items.cacheTime && items.cacheTime) {
+                console.log(items.cacheTime);
+                if (items.cacheTime > Date.now() - 4 * 3600 * 1000) {
+                    console.log("if block: ");
+                    console.log(items.cacheTime);
+                    return getBaseWebsiteInfo(url, RenderView); // Serialization is auto, so nested objects are no problem
+                }
+                else
+                    RenderView(items.cache);
+            }
+            getBaseWebsiteInfo(url, RenderView)
         });
     });
 });
