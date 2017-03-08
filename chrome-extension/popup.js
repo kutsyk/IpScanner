@@ -1,3 +1,12 @@
+// chrome.runtime.onMessage.addListener(
+//     function(request, sender, sendResponse) {
+//         console.log(sender.tab ?
+//         "from a content script:" + sender.tab.url :
+//             "from the extension");
+//         if (request.greeting == "hello")
+//             sendResponse({farewell: "goodbye"});
+//     });
+//
 function getCurrentTabUrl(callback) {
     var queryInfo = {
         active: true,
@@ -78,11 +87,9 @@ function getBaseWebsiteInfo(searchTerm, callback, errorCallback) {
                     });
             });
     });
-
 }
 
 function renderStatus(statusText) {
-    OPENED = false;
     document.getElementById('status').textContent = statusText;
 }
 
@@ -116,21 +123,20 @@ document.addEventListener('DOMContentLoaded', function () {
         host = pathArray[2];
         url = host;
         // Put the image URL in Google search.
-        renderStatus('Collecting info ' + url);
+        // renderStatus('Collecting info ' + url);
 
         chrome.storage.local.get(['cache', 'cacheTime'], function (items) {
-            console.log(items);
-            if (items.cache && items.cacheTime && items.cacheTime) {
-                console.log(items.cacheTime);
-                if (items.cacheTime > Date.now() - 4 * 3600 * 1000) {
-                    console.log("if block: ");
-                    console.log(items.cacheTime);
+            if (items.cache && items.cacheTime) {
+                if (items.cacheTime > Date.now() - 60 * 3600 * 1000) {
                     return getBaseWebsiteInfo(url, RenderView); // Serialization is auto, so nested objects are no problem
                 }
-                else
+                else {
                     RenderView(items.cache);
+                }
             }
-            getBaseWebsiteInfo(url, RenderView)
+            else {
+                getBaseWebsiteInfo(url, RenderView)
+            }
         });
     });
 });

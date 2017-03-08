@@ -12,9 +12,25 @@
   "permissions": [
     "activeTab",
     "storage",
+    "tabs",
+    "http://*/*",
+    "https://*/*",
     "https://ajax.googleapis.com/",
     "https://rest.db.ripe.net/",
     "https://whois.arin.net/",
     "https://freegeoip.net/"
+  ],
+  "background": {
+    "scripts": ["content.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start" // pay attention to this line
+    }
   ]
 }
