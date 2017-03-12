@@ -1,3 +1,16 @@
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.greeting == "hello")
+            sendResponse({url: sender.tab ? sender.tab.url : ""});
+    });
+
+chrome.runtime.onMessage.addListener(
+    function (request, sender, sendResponse) {
+        if (request.changeIcon) {
+            chrome.browserAction.setIcon({path: '/flag_icons/png/' + request.country_code + '.png'});
+        }
+    });
+
 // chrome.runtime.onMessage.addListener(
 //     function(request, sender, sendResponse) {
 //         console.log(sender.tab ?

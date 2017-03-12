@@ -21,7 +21,7 @@
     "https://freegeoip.net/"
   ],
   "background": {
-    "scripts": ["content.js"]
+    "scripts": ["content.js", "popup.js"]
   },
   "content_scripts": [
     {
