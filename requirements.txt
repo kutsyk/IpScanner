@@ -30,7 +30,7 @@ PyX==0.12.1
 requests==2.11.1
 rsa==3.4.2
 s3transfer==0.1.9
-scapy==2.3.3
+scapy==2.4.1
 simplegeneric==0.8.1
 six==1.10.0
 traitlets==4.3.1
